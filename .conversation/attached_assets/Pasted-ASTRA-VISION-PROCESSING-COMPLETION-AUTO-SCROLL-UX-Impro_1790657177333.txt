@@ -1,0 +1,263 @@
+ASTRA VISION — PROCESSING COMPLETION + AUTO-SCROLL UX
+
+Improve the existing ASTRA VISION analysis workflow.
+
+When the user uploads an image and clicks ANALYZE IMAGE, implement the following exact UX flow:
+
+REQUIRED FLOW
+
+UPLOAD IMAGE → ANALYZE IMAGE → AI PROCESSING → PROCESSING COMPLETED → AUTOMATIC SCROLL → RESULTS
+
+1. START PROCESSING
+
+When the user clicks ANALYZE IMAGE:
+
+* Disable the Analyze button temporarily.
+* Show the premium AI processing animation.
+* Display:
+
+AI ANALYSIS IN PROGRESS
+
+Then show the stages sequentially:
+
+* 01 — IMAGE PREPROCESSING
+* 02 — OBJECT DETECTION
+* 03 — AIRCRAFT CLASSIFICATION
+* 04 — CONFIDENCE ANALYSIS
+* 05 — GRAD-CAM EXPLANATION
+* 06 — FINALIZING RESULTS
+
+Use a cinematic aerospace/HUD-style animation with scanning lines, radar sweep, glowing progress indicators, and smooth transitions.
+
+Do NOT fake the actual result.
+
+⸻
+
+2. DETECT REAL PROCESSING COMPLETION
+
+The processing state must be controlled by the real backend/API response.
+
+Do NOT decide that processing is finished using a fixed timer.
+
+Only consider processing complete when:
+
+* The API request succeeds.
+* The analysis result has been received.
+* The result data has been successfully parsed.
+* The required result components are ready to render.
+
+⸻
+
+3. SHOW COMPLETION MESSAGE
+
+Immediately after successful processing, display a prominent success notification:
+
+✓ PROCESSING COMPLETED
+
+Under it:
+
+AI analysis successfully completed.
+
+Use a premium green tactical/HUD visual style.
+
+Animation:
+
+1. Checkmark draws in.
+2. Border/glow activates.
+3. Text fades/slides in.
+4. Notification briefly pulses.
+5. Results section begins appearing.
+
+Do not keep this notification on screen for an unnecessarily long time.
+
+⸻
+
+4. AUTOMATICALLY SCROLL TO RESULTS
+
+This is REQUIRED.
+
+As soon as the real analysis response has successfully completed and the Results section is rendered, automatically scroll the page to the Results section.
+
+Use smooth scrolling.
+
+Example:
+
+resultsSection.scrollIntoView({
+  behavior: "smooth",
+  block: "start"
+});
+
+Use a React ref for the Results section.
+
+Example:
+
+const resultsRef = useRef(null);
+
+Then, after successful analysis:
+
+resultsRef.current?.scrollIntoView({
+  behavior: "smooth",
+  block: "start"
+});
+
+IMPORTANT:
+
+* Do NOT use arbitrary setTimeout() to determine completion.
+* Do NOT scroll before the API response arrives.
+* Do NOT scroll when the Analyze button is clicked.
+* Do NOT scroll if the analysis fails.
+* Scroll only after valid results are available.
+
+⸻
+
+5. RESULTS SECTION ENTRY ANIMATION
+
+When the automatic scroll reaches Results:
+
+Display the section with a professional reveal animation.
+
+Title:
+
+ANALYSIS RESULTS
+
+Subtitle:
+
+AI VISION INFERENCE COMPLETE
+
+Then reveal:
+
+1. Detection image
+2. Detected objects
+3. Predicted class
+4. Confidence score
+5. Top-3 predictions
+6. Grad-CAM explanation
+7. Model information
+8. Inference time
+
+Use staggered animations so the information appears naturally.
+
+⸻
+
+6. HIGHLIGHT RESULTS AFTER SCROLL
+
+When the Results section becomes visible:
+
+* Add a subtle green/cyan glow around the Results container.
+* Animate the border once.
+* Show a small HUD indicator:
+
+RESULTS READY
+
+After the initial animation, return the section to its normal appearance.
+
+Do not create an excessive flashing effect.
+
+⸻
+
+7. MULTI-OBJECT RESULTS
+
+If multiple objects are detected, show all valid detections.
+
+Example:
+
+DETECTION 01
+Fighter Aircraft
+92.4%
+
+DETECTION 02
+Helicopter
+87.6%
+
+DETECTION 03
+Drone
+78.3%
+
+The results should appear progressively after the automatic scroll.
+
+⸻
+
+8. ERROR BEHAVIOR
+
+If processing fails:
+
+Do NOT show:
+
+PROCESSING COMPLETED
+
+Do NOT automatically scroll to Results.
+
+Instead show:
+
+⚠ ANALYSIS FAILED
+
+Unable to complete AI analysis. Please try again.
+
+Provide:
+
+TRY AGAIN
+
+Keep the user at the analysis area.
+
+⸻
+
+9. MOBILE BEHAVIOR
+
+The same functionality must work on mobile.
+
+After successful analysis:
+
+PROCESSING COMPLETED → AUTOMATIC SMOOTH SCROLL → RESULTS
+
+Ensure the Results heading is not hidden behind the sticky navigation bar.
+
+Use appropriate scroll offset if necessary.
+
+⸻
+
+10. ACCESSIBILITY
+
+Respect the user’s reduced-motion preference.
+
+If prefers-reduced-motion: reduce is enabled:
+
+* Disable cinematic scrolling.
+* Use instant/short scrolling.
+* Reduce processing animations.
+* Keep all information accessible.
+
+⸻
+
+11. FINAL USER EXPERIENCE
+
+The final experience must feel like a real AI system:
+
+USER UPLOADS IMAGE
+
+↓
+
+ANALYZE IMAGE
+
+↓
+
+AI PROCESSING
+
+↓
+
+✓ PROCESSING COMPLETED
+
+↓
+
+AUTOMATIC SMOOTH SCROLL
+
+↓
+
+ANALYSIS RESULTS
+
+↓
+
+DETECTION + CLASSIFICATION + CONFIDENCE + TOP-3 + GRAD-CAM
+
+Make this behavior reliable, polished, responsive, and connected to the actual backend response.
+
+Do not use fake timers or simulated completion states.

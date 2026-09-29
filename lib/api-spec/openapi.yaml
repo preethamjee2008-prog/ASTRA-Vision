@@ -10,6 +10,8 @@ servers:
 tags:
   - name: health
     description: Health operations
+  - name: vision
+    description: Defence-object recognition operations
 paths:
   /healthz:
     get:
@@ -24,6 +26,78 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+  /model-info:
+    get:
+      operationId: getModelInfo
+      tags: [vision]
+      summary: Get active model and dataset information
+      responses:
+        "200":
+          description: Active model information
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ModelInfo"
+  /evaluation:
+    get:
+      operationId: getEvaluation
+      tags: [vision]
+      summary: Get honest dataset and evaluation metrics
+      responses:
+        "200":
+          description: Evaluation information
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Evaluation"
+  /catalog:
+    get:
+      operationId: getCatalog
+      tags: [vision]
+      summary: List evidence-backed reference images and model names
+      responses:
+        "200":
+          description: Reference catalog
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CatalogResponse"
+  /history:
+    get:
+      operationId: getHistory
+      tags: [vision]
+      summary: Get recent server-side predictions
+      responses:
+        "200":
+          description: Recent predictions
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HistoryResponse"
+  /analyze:
+    post:
+      operationId: analyzeImage
+      tags: [vision]
+      summary: Analyze an uploaded defence image
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schemas/ImageAnalysisInput"
+      responses:
+        "200":
+          description: Image analysis result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AnalysisResponse"
+        "400":
+          description: Invalid image or upload
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
 components:
   schemas:
     HealthStatus:
@@ -33,4 +107,217 @@ components:
           type: string
       required:
         - status
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+        code:
+          type: string
+      required: [error]
+    ImageAnalysisInput:
+      type: object
+      properties:
+        image:
+          type: string
+          format: binary
+      required: [image]
+    VehicleClass:
+      type: string
+      enum: [aircraft, helicopter, drone, military-vehicle, naval]
+    TopPrediction:
+      type: object
+      properties:
+        label: { type: string }
+        confidence: { type: number, format: float }
+        rank: { type: integer }
+      required: [label, confidence, rank]
+    ReferenceMatch:
+      type: object
+      properties:
+        exact_name: { type: string }
+        category:
+          $ref: "#/components/schemas/VehicleClass"
+        reference_file: { type: string }
+        reference_title: { type: string }
+        source_url: { type: string }
+        license: { type: string }
+        similarity: { type: number, format: float }
+        evidence_level:
+          type: string
+          enum: [exact-file-match, visual-neighbor, catalog-reference]
+      required: [exact_name, category, reference_file, reference_title, source_url, license, similarity, evidence_level]
+    Detection:
+      type: object
+      properties:
+        class_name: { type: string }
+        confidence: { type: number, format: float }
+        box:
+          type: [object, "null"]
+          properties:
+            x: { type: number }
+            y: { type: number }
+            width: { type: number }
+            height: { type: number }
+          required: [x, y, width, height]
+      required: [class_name, confidence, box]
+    AnalysisResponse:
+      type: object
+      properties:
+        prediction:
+          $ref: "#/components/schemas/TopPrediction"
+        top_predictions:
+          type: array
+          items:
+            $ref: "#/components/schemas/TopPrediction"
+        reference_match:
+          type: [object, "null"]
+          $ref: "#/components/schemas/ReferenceMatch"
+        detections:
+          type: array
+          items:
+            $ref: "#/components/schemas/Detection"
+        image:
+          $ref: "#/components/schemas/ImageMetadata"
+        preprocessing:
+          $ref: "#/components/schemas/PreprocessingInfo"
+        model:
+          $ref: "#/components/schemas/ModelSummary"
+        confidence_status:
+          type: string
+          enum: [high, medium, low, unsupported]
+        explanation: { type: string }
+        inference_time_ms: { type: integer }
+        analyzed_at: { type: string, format: date-time }
+      required: [prediction, top_predictions, reference_match, detections, image, preprocessing, model, confidence_status, explanation, inference_time_ms, analyzed_at]
+    ImageMetadata:
+      type: object
+      properties:
+        width: { type: integer }
+        height: { type: integer }
+        format: { type: string }
+        size_bytes: { type: integer }
+      required: [width, height, format, size_bytes]
+    PreprocessingInfo:
+      type: object
+      properties:
+        applied: { type: boolean }
+        summary: { type: string }
+      required: [applied, summary]
+    ModelSummary:
+      type: object
+      properties:
+        detector: { type: string }
+        classifier: { type: string }
+        mode: { type: string }
+        device: { type: string }
+      required: [detector, classifier, mode, device]
+    ModelInfo:
+      type: object
+      properties:
+        name: { type: string }
+        classifier: { type: string }
+        task: { type: string }
+        reference_repository: { type: string }
+        supported_classes:
+          type: array
+          items:
+            $ref: "#/components/schemas/VehicleClass"
+        dataset_images: { type: integer }
+        catalog_models: { type: integer }
+        input_formats:
+          type: array
+          items: { type: string }
+        max_file_size_mb: { type: number }
+        limitations:
+          type: array
+          items: { type: string }
+      required: [name, classifier, task, reference_repository, supported_classes, dataset_images, catalog_models, input_formats, max_file_size_mb, limitations]
+    ClassMetric:
+      type: object
+      properties:
+        label: { type: string }
+        image_count: { type: integer }
+        accuracy: { type: [number, "null"] }
+      required: [label, image_count, accuracy]
+    Evaluation:
+      type: object
+      properties:
+        evaluated: { type: boolean }
+        dataset_report:
+          $ref: "#/components/schemas/DatasetReport"
+        metrics:
+          type: object
+          properties:
+            accuracy: { type: [number, "null"] }
+            top3_accuracy: { type: [number, "null"] }
+            precision: { type: [number, "null"] }
+            recall: { type: [number, "null"] }
+            f1: { type: [number, "null"] }
+          required: [accuracy, top3_accuracy, precision, recall, f1]
+        per_class:
+          type: array
+          items:
+            $ref: "#/components/schemas/ClassMetric"
+        note: { type: string }
+      required: [evaluated, dataset_report, metrics, per_class, note]
+    DatasetReport:
+      type: object
+      properties:
+        total_images: { type: integer }
+        classes: { type: integer }
+        split: { type: string }
+        train_images: { type: integer }
+        validation_images: { type: integer }
+        test_images: { type: integer }
+        invalid_images: { type: integer }
+        duplicate_images: { type: integer }
+        class_distribution:
+          type: object
+          additionalProperties: { type: integer }
+        source: { type: string }
+      required: [total_images, classes, split, train_images, validation_images, test_images, invalid_images, duplicate_images, class_distribution, source]
+    CatalogEntry:
+      type: object
+      properties:
+        id: { type: string }
+        exact_name: { type: string }
+        category:
+          $ref: "#/components/schemas/VehicleClass"
+        file_name: { type: string }
+        image_url: { type: string }
+        source_title: { type: string }
+        artist: { type: string }
+        license: { type: string }
+        source_url: { type: string }
+      required: [id, exact_name, category, file_name, image_url, source_title, artist, license, source_url]
+    CatalogResponse:
+      type: object
+      properties:
+        entries:
+          type: array
+          items:
+            $ref: "#/components/schemas/CatalogEntry"
+        class_counts:
+          type: object
+          additionalProperties: { type: integer }
+      required: [entries, class_counts]
+    HistoryItem:
+      type: object
+      properties:
+        id: { type: string }
+        analyzed_at: { type: string, format: date-time }
+        file_name: { type: string }
+        category: { type: string }
+        confidence: { type: number }
+        evidence: { type: string }
+      required: [id, analyzed_at, file_name, category, confidence, evidence]
+    HistoryResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/HistoryItem"
+      required: [items]
 

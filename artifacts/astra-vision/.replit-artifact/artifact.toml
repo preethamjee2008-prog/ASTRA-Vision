@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "ASTRA Vision"
+description = "A transparent aerospace computer-vision workspace for analyzing aircraft and defense imagery with evidence-backed classification, evaluation, catalog references, and history."
+version = "1.0.0"
+id = "artifacts/astra-vision"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 22034
+
+[services.development]
+run = "pnpm --filter @workspace/astra-vision run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/astra-vision", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/astra-vision/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "22034"
+BASE_PATH = "/"

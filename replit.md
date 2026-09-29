@@ -1,6 +1,6 @@
-# [Project name]
+# ASTRA Vision
 
-_Replace the heading above with the project's name, and this line with one sentence describing what this app does for users._
+ASTRA Vision is a transparent aerospace computer-vision workspace for reviewing aircraft and defense imagery with evidence-backed classification.
 
 ## Run & Operate
 
@@ -22,15 +22,21 @@ _Replace the heading above with the project's name, and this line with one sente
 
 ## Where things live
 
-_Populate as you build — short repo map plus pointers to the source-of-truth file for DB schema, API contracts, theme files, etc._
+- `artifacts/astra-vision/src/` — React shell, mission pages, processing HUD, result panels, and theme.
+- `artifacts/api-server/src/services/vision.ts` — catalog-aware image analysis service.
+- `artifacts/astra-vision/public/dataset/` — credited reference catalog and source images.
+- `lib/api-spec/openapi.yaml` — source of truth for health, model, evaluation, catalog, history, and analysis contracts.
 
 ## Architecture decisions
 
-_Populate as you build — non-obvious choices a reader couldn't infer from the code (3-5 bullets)._
+- Analysis completion is driven by a parsed API response; the frontend never uses a timer to decide when results are ready.
+- The starter dataset has image-level labels but no bounding-box annotations, so the UI keeps spatial detection and Grad-CAM explicitly unavailable.
+- Exact names are shown only with catalog evidence; otherwise the active model response remains at the supported class level.
+- Evaluation metrics remain null / not evaluated until a held-out model run exists.
 
 ## Product
 
-_Describe the high-level user-facing capabilities of this app once they exist._
+Users can upload and analyze an image, inspect confidence and top predictions, trace catalog references, review the server audit trail, and understand model scope and evaluation limitations.
 
 ## User preferences
 
@@ -38,7 +44,9 @@ _Populate as you build — explicit user instructions worth remembering across s
 
 ## Gotchas
 
-_Populate as you build — sharp edges, "always run X before Y" rules._
+- Run `pnpm --filter @workspace/api-spec run codegen` after changing `lib/api-spec/openapi.yaml`.
+- The frontend build expects workflow-provided `PORT` and `BASE_PATH`; use the managed ASTRA Vision workflow for previews.
+- Multipart OpenAPI schemas generate a `Blob` type in `@workspace/api-zod`, so its TypeScript lib includes `dom`.
 
 ## Pointers
 
