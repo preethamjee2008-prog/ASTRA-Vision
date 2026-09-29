@@ -218,7 +218,6 @@ components:
         name: { type: string }
         classifier: { type: string }
         task: { type: string }
-        reference_repository: { type: string }
         supported_classes:
           type: array
           items:
@@ -232,7 +231,7 @@ components:
         limitations:
           type: array
           items: { type: string }
-      required: [name, classifier, task, reference_repository, supported_classes, dataset_images, catalog_models, input_formats, max_file_size_mb, limitations]
+      required: [name, classifier, task, supported_classes, dataset_images, catalog_models, input_formats, max_file_size_mb, limitations]
     ClassMetric:
       type: object
       properties:

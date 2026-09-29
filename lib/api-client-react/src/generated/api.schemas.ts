@@ -120,7 +120,6 @@ export interface ModelInfo {
   name: string;
   classifier: string;
   task: string;
-  reference_repository: string;
   supported_classes: VehicleClass[];
   dataset_images: number;
   catalog_models: number;

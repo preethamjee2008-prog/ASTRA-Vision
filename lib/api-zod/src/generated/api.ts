@@ -24,7 +24,6 @@ export const GetModelInfoResponse = zod.object({
   "name": zod.string(),
   "classifier": zod.string(),
   "task": zod.string(),
-  "reference_repository": zod.string(),
   "supported_classes": zod.array(zod.enum(['aircraft', 'helicopter', 'drone', 'military-vehicle', 'naval'])),
   "dataset_images": zod.number().int(),
   "catalog_models": zod.number().int(),

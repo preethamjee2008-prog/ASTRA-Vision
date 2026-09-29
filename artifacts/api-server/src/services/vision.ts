@@ -23,7 +23,6 @@ const DATA_ROOT = [
 ].find((candidate) => existsSync(candidate)) ?? path.resolve(process.cwd(), "artifacts/astra-vision/public/dataset");
 const IMAGE_ROOT = path.join(DATA_ROOT, "images");
 const MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024;
-const REFERENCE_REPOSITORY = "https://github.com/AdvaithVellanki/Aircraft-Classification";
 const MODEL_NAME = "Xenova/clip-vit-base-patch32";
 const CLASS_NAMES = ["aircraft", "helicopter", "drone", "military-vehicle", "naval"] as const;
 const CLASS_LABELS = ["aircraft", "helicopter", "drone", "military vehicle", "naval vessel"] as const;
@@ -286,7 +285,6 @@ export async function modelInfo() {
     name: "ASTRA catalog-aware vision",
     classifier: MODEL_NAME,
     task: "five-class zero-shot classification with evidence-backed catalog matching",
-    reference_repository: REFERENCE_REPOSITORY,
     supported_classes: CLASS_NAMES,
     dataset_images: catalog.length,
     catalog_models: new Set(catalog.map((entry) => entry.exactName)).size,
